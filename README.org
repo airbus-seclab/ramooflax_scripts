@@ -1,0 +1,17 @@
+#+LANGUAGE: en
+#+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+EXPORT_EXCLUDE_TAGS: exclude
+#+STARTUP: showall
+
+* What is this ?
+
+Ramooflax is a free and open source (GPLv2) virtualization tool available [[https://github.com/sduverger/ramooflax][here]].
+
+It can be remote controlled with a python framework.
+
+This repository provides you with entertaining, sometimes useful, python ramooflax scripts.
+
+* Ramooflax python API documentation ?
+
+As for the winter, documentation is coming ...

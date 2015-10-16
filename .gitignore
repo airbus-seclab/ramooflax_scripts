@@ -1,0 +1,11 @@
+.*
+*.o
+*.i
+*.d
+*.g
+*.bin
+*.map
+*.pyc
+*.config
+*.patch
+!.gitignore
