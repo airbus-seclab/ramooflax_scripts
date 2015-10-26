@@ -16,7 +16,6 @@ def disasm_wrapper(addr, data):
 
 def disasm(vm):
     addr = vm.cpu.code_location()
-    print vm.symbols[addr].name
     try:
         print disassemble(vm, disasm_wrapper, addr)
     except GDBError as e:
