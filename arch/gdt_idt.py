@@ -15,8 +15,7 @@ vm = VM(CPUFamily.Intel, peer)
 
 log.setup(info=True, fail=True,
           gdb=False, vm=True,
-          ads=False, brk=True,
-          evt=False)
+          brk=True,  evt=False)
 
 # Retrieve 32 bits GDT/IDT content
 vm.attach()
