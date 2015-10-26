@@ -7,14 +7,9 @@
 #     read by disasm engine is 15 bytes. We may be located
 #     below 15 bytes from the end of the page.
 #
-import sys
-import struct
-
-from symbols        import SymTab, SymParser
-from ramooflax      import VM, CPUFamily, log, disassemble
-from ramooflax      import AddrSpace, PgMsk, Page, PageTable
-from ramooflax      import GDBError
-from amoco.arch.x86 import cpu_x86 as am
+from amoco.arch.x86  import cpu_x86 as am
+from ramooflax.core  import VM, CPUFamily, log, GDBError
+from ramooflax.utils import disassemble
 
 def disasm_wrapper(addr, data):
     return am.disassemble(data, address=addr)
@@ -43,17 +38,15 @@ def sstep(vm):
     print disasm(vm)
     return False
 
-################
-##### MAIN #####
-################
+##
+## Main
+##
 peer = "172.16.131.128:1337"
 vm = VM(CPUFamily.Intel, peer)
 
-vm.ads = {}
-
 log.setup(info=True, fail=True,
           gdb=False, vm=True,
-          ads=False, brk=True, evt=False)
+          brk=True,  evt=False)
 
 vm.attach()
 vm.stop()

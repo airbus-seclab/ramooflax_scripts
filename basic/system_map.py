@@ -4,30 +4,26 @@
 # so that you can play with symbols
 #
 import sys
-import struct
 
-from symbols        import SymTab, SymParser
-from ramooflax      import VM, CPUFamily, log, disassemble
-from ramooflax      import AddrSpace, PgMsk, Page, PageTable
+from ramooflax.core   import VM, CPUFamily, log
+from ramooflax.utils  import SymTab, SymParser
 
-#
-# Main
-#
+##
+## Main
+##
 if len(sys.argv) < 2:
     print "give me 'system.map"
     sys.exit(1)
 
-# load kernel symbols
-vm.symbols = SymTab(SymParser().from_system_map(sys.argv[1]))
-
 peer = "172.16.131.128:1337"
 vm = VM(CPUFamily.Intel, peer)
 
-vm.ads = {}
-
 log.setup(info=True, fail=True,
           gdb=False, vm=True,
-          ads=False, brk=True, evt=False)
+          brk=True,  evt=False)
+
+# load kernel symbols
+vm.symbols = SymTab(SymParser().from_system_map(sys.argv[1]))
 
 vm.attach()
 vm.stop()

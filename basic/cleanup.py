@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-from ramooflax import VM, CPUFamily
+#
+# Clean up vmm debugging session (if remaining cr3 tracking)
+#
+from ramooflax.core import VM, CPUFamily
 
-#
-# Main
-#
-vm = VM(CPUFamily.AMD, "192.168.254.254:1234")
+##
+## Main
+##
+peer = "172.16.131.128:1337"
+vm = VM(CPUFamily.Intel, peer)
 
 vm.attach()
 vm.stop()

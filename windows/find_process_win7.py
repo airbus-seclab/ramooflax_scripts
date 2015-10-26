@@ -6,8 +6,10 @@
 # On each write, the vmm gives us control
 # before the write operation
 #
-from ramooflax import VM, CPUFamily, OSFactory, OSAffinity, log
 import sys
+
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import OSFactory, OSAffinity
 
 # create logging for this script
 log.setup(info=True, fail=True)
@@ -27,11 +29,11 @@ settings = {"kprcb":0x20, "kthread":4,
 os = OSFactory(OSAffinity.Win7, settings)
 hook = os.find_process_filter(process_name)
 
-#
-# Main
-#
-#vm = VM(CPUFamily.AMD, "192.168.254.254:1234")
-vm = VM(CPUFamily.AMD, "172.16.131.128:1337")
+##
+## Main
+##
+peer = "172.16.131.128:1337"
+vm = VM(CPUFamily.Intel, peer)
 
 vm.attach()
 vm.stop()

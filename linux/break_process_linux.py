@@ -2,7 +2,8 @@
 #
 # We are looking for "break" running under debian
 #
-from ramooflax import VM, CPUFamily, OSFactory, OSAffinity, log, Log
+from ramooflax.core  import VM, CPUFamily, log, Log
+from ramooflax.utils import OSFactory, OSAffinity
 
 # Some offsets for debian 2.6.32-5-486 kernel
 #settings = {"thread_size":8192, "comm":540, "next":240, "mm":268, "pgd":36}
@@ -17,10 +18,11 @@ hook = os.find_process_filter("break")
 log.setup(info=(True,Log.blue), fail=(True,Log.red),
           brk=True, gdb=True, vm=True, evt=True)
 
-#
-# Main
-#
-vm = VM(CPUFamily.Intel, "172.16.131.128:1337")
+##
+## Main
+##
+peer = "172.16.131.128:1337"
+vm = VM(CPUFamily.Intel, peer)
 
 vm.attach()
 vm.stop()

@@ -5,8 +5,10 @@
 # We install the Linux26.find_process_filter on cr3 writes
 # The framework will call our filter Before each write
 #
-from ramooflax import VM, CPUFamily, OSFactory, OSAffinity, log
 import sys
+
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import OSFactory, OSAffinity
 
 # create logging for this script
 log.setup(info=True, fail=True)
@@ -23,11 +25,8 @@ settings = {"thread_size":8192, "comm":540, "next":240, "mm":268, "pgd":36}
 os = OSFactory(OSAffinity.Linux26, settings)
 hook = os.find_process_filter(process_name)
 
-#
-# Main
-#
-#vm = VM(CPUFamily.AMD, "192.168.254.254:1234")
-vm = VM(CPUFamily.Intel, "172.16.131.128:1337")
+peer = "172.16.131.128:1337"
+vm = VM(CPUFamily.Intel, peer)
 
 vm.attach()
 vm.stop()

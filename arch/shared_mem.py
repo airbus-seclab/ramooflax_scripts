@@ -1,22 +1,23 @@
 #!/usr/bin/env python
-
-import sys
-import struct
-
-from collections    import defaultdict
-from ramooflax      import VM, CPUFamily, log
-from ramooflax      import AddrSpace, PgMsk, Page, PageTable
+#
+# Collect some address spaces throught write to cr3
+# once "nr_cr3" have been collected, look up for
+# shared memory pages between them.
+#
+from collections     import defaultdict
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import AddrSpace, PgMsk
 
 def wcr3(vm):
     cr3 = vm.cpu.sr.cr3 & PgMsk.addr
     if not cr3:
         return False
 
-    if not vm.ads.has_key(cr3) and cr3!= 0x36000:
+    if not vm.ads.has_key(cr3):
         ads = AddrSpace(vm, cr3)
         vm.ads[cr3] = ads
         log("info", "added new cr3 0x%x to ads (%d)" % (cr3, len(vm.ads)))
-    elif len(vm.ads) > 1:
+    elif len(vm.ads) >= vm.nr_cr3:
         return find_shared(vm)
 
     return False
@@ -39,18 +40,18 @@ def find_shared(vm):
 
     return True
 
-################
-##### MAIN #####
-################
+##
+## Main
+##
 peer = "172.16.131.128:1337"
 vm = VM(CPUFamily.Intel, peer)
 
+vm.nr_cr3 = 5
 vm.ads = {}
 
-log.setup(info=True, fail=True,
-          gdb=False, vm=True,
-          ads=False, brk=True,
-          evt=False, fsm=(True,log.blue))
+log.setup(info=True, fail=True, gdb=False,
+          vm=True,   brk=True,  evt=False,
+          fsm=(True,log.blue))
 
 vm.attach()
 vm.stop()

@@ -10,8 +10,10 @@
 # On each write, the vmm gives us control "AFTER"
 # the write operation
 #
-from ramooflax import VM, CPUFamily, OSFactory, OSAffinity, log
 import sys
+
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import OSFactory, OSAffinity
 
 # create logging for this script
 log.setup(info=True, fail=True)
@@ -28,9 +30,9 @@ settings = {"thread_size":8192, "comm":540, "next":240, "mm":268, "pgd":36}
 os = OSFactory(OSAffinity.Linux26, settings)
 hook = os.find_process_filter(process_name)
 
-#
-# Main
-#
+##
+## Main
+##
 vm = VM(CPUFamily.AMD, "192.168.254.254:1234")
 
 vm.attach()

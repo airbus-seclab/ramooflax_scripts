@@ -50,7 +50,8 @@
 # where the #PF has been triggered
 # With the LBR, we can see that we come from "from"
 #
-from ramooflax import VM, CPUFamily, OSFactory, OSAffinity, CPUException, log
+from ramooflax.core  import VM, CPUFamily, CPUException, log
+from ramooflax.utils import OSFactory, OSAffinity
 
 # create logging for this script
 log.setup(info=True, fail=True)
@@ -60,17 +61,16 @@ settings = {"thread_size":8192, "comm":540, "next":240, "mm":268, "pgd":36}
 os = OSFactory(OSAffinity.Linux26, settings)
 hook = os.find_process_filter("prog")
 
-#
 # Print eip on raised page fault
-#
 def pf_hook(vm):
     log("info", "Page Fault @ %#x" % vm.cpu.gpr.pc)
     return True
 
-#
-# Main
-#
-vm = VM(CPUFamily.AMD, "192.168.254.254:1234")
+##
+## Main
+##
+peer = "172.16.131.128:1337"
+vm = VM(CPUFamily.Intel, peer)
 
 vm.attach()
 vm.stop()

@@ -1,10 +1,15 @@
 #!/usr/bin/env python
-
+#
+# Pretty print the GDT/IDT
+#
 import struct
-from x86_desc import *
 
-from ramooflax import VM, CPUFamily, log
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import SegmentDescriptor, InterruptDescriptor
 
+##
+## Main
+##
 peer = "172.16.131.128:1337"
 vm = VM(CPUFamily.Intel, peer)
 
@@ -35,5 +40,5 @@ for (tag,cls,dt,sz) in dts:
     #print dsc[0]
     print dsc[0].hdr(),
     for i in xrange(len(dsc)):
-        print "0x%.4x%s" % (i<<3,repr(dsc[i])),
+        print "0x%.4x | 0x%.4x%s" % (i,i<<3,repr(dsc[i])),
     print

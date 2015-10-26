@@ -1,22 +1,32 @@
 #!/usr/bin/env python
+#
+# Collect some address spaces throught write to cr3
+# once "nr_cr3" have been collected, look up for
+# kernel memory pages with user mappings.
+#
+from collections     import defaultdict
+from ramooflax.core  import VM, CPUFamily, log
+from ramooflax.utils import AddrSpace, PgMsk
 
-import sys
-import struct
+def wcr3(vm):
+    cr3 = vm.cpu.sr.cr3 & PgMsk.addr
+    if not cr3:
+        return False
 
-from collections    import defaultdict
-from ramooflax      import VM, CPUFamily, log
-from ramooflax      import AddrSpace, PgMsk, Page, PageTable
+    if not vm.ads.has_key(cr3):
+        ads = AddrSpace(vm, cr3)
+        vm.ads[cr3] = ads
+        for p in ads.iter_pages(user=False):
+            vm.kppg[p.paddr].append((cr3,p))
+        log("info", "added new cr3 0x%x to ads (%d)" % (cr3, len(vm.ads)))
+
+    return False
 
 # Detect any kernel physical page which might be
 # mapped elsewhere as user one(s) into currently known
-# adress spaces (vm.ads)
+# address spaces (vm.ads)
 def find_kmem(vm):
     log("fkm", "Looking for kernel pages into user mappings")
-    #keep track of every kernel physical pages
-    vm.kppg = defaultdict(list)
-    for a in vm.ads:
-        for p in vm.ads[a].iter_pages(user=False):
-            vm.kppg[p.paddr].append((a,p))
 
     #check if they have another mapping with user privilege
     fmt = "U ads 0x%x match K ads 0x%x:\n (user) %s\n (krnl) %s"
@@ -28,53 +38,21 @@ def find_kmem(vm):
                     for p in ulst:
                         log("fkm", fmt % (a,ka,p,kp))
 
-
-# For given address space,
-# search mappings of each PGD/PTs
-def search_ads(ads):
-    log("sads", "Searching PGD/PTs mapping into address space 0x%x" % ads.pgd.addr)
-
-    ptb_addrs = [ads.pgd.addr]
-    for p in ads.iter_pagetables():
-        ptb_addrs.append(p.addr)
-
-    log("sads", "PGD/PTs : %s" % " ".join([hex(i) for i in ptb_addrs]))
-    for a in ptb_addrs:
-        plst = ads.search_paddr(a)
-        if len(plst) != 0:
-            log("sads", "match for 0x%x" % a)
-            for p in plst:
-                log("sads", "%s" % p)
-
-def wcr3(vm):
-    cr3 = vm.cpu.sr.cr3 & PgMsk.addr
-    if not cr3:
-        return False
-
-    if not vm.ads.has_key(cr3):
-        ads = AddrSpace(vm, cr3)
-        vm.ads[cr3] = ads
-        log("info", "added new cr3 0x%x to ads (%d)" % (cr3, len(vm.ads)))
-        search_ads(ads)
-    elif len(vm.ads) > 1:
-        find_kmem(vm)
-
-    return False
-
-
-
-################
-##### MAIN #####
-################
+##
+## Main
+##
 peer = "172.16.131.128:1337"
 vm = VM(CPUFamily.Intel, peer)
 
+vm.nr_cr3 = 1
 vm.ads = {}
+#keep track of every kernel physical pages
+vm.kppg = defaultdict(list)
 
 log.setup(info=True, fail=True,
           gdb=False, vm=True,
-          ads=False, brk=True, evt=False,
-          fkm=(True,log.blue), sads=(True,log.green))
+          brk=True,  evt=False,
+          fkm=(True,log.blue))
 
 vm.attach()
 vm.stop()
@@ -82,4 +60,8 @@ vm.stop()
 vm.cpu.filter_write_cr(3, wcr3)
 
 log("info", "ready!")
-vm.interact2(dict(globals(), **locals()))
+while len(vm.ads) < vm.nr_cr3:
+    vm.resume()
+
+vm.detach()
+find_kmem(vm)
